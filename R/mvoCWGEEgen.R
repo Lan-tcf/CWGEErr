@@ -12,8 +12,8 @@ mvoCWGEEgen <- function(mdat, beta0, nbeta, id, Y_var, nresponse, X_mat, corr.st
   iter <- 0
   
   while(sum(abs(bdiff))>.00000001){
-    DWZ <- matrix(0, nrow = nbeta)
-    DWD <- matrix(0, ncol = nbeta, nrow = nbeta)
+    DWZ <- matrix(0, nrow = nbeta) # score
+    DWD <- matrix(0, ncol = nbeta, nrow = nbeta) # information
     DWZZWD <- matrix(0, ncol = nbeta, nrow = nbeta)
     
     if (corr.str == "ind")
@@ -23,7 +23,7 @@ mvoCWGEEgen <- function(mdat, beta0, nbeta, id, Y_var, nresponse, X_mat, corr.st
     if (corr.str == "exch")
       R <- estalpha1_exch_fixed(mdat, id, Z, nresponse)
     
-    for (i in id){
+    for (i in id){ # for each student
       
       csizei <- nlevels(as.factor(mdat[mdat$cluster == i,]$unit))
       wi <- 1/csizei
@@ -32,36 +32,36 @@ mvoCWGEEgen <- function(mdat, beta0, nbeta, id, Y_var, nresponse, X_mat, corr.st
       DWZj <- matrix(0, nrow = nbeta)
       DWDj <- matrix(0, ncol = nbeta, nrow = nbeta)
       
-      for(j in unitveci){
+      for(j in unitveci){ # for each measurement
         
         y <- as.matrix( Y_var[mdat$cluster==i & mdat$unit == j] )
         x <- as.matrix( X_mat[mdat$cluster==i & mdat$unit == j,] )
-        u <- exp( x %*% beta ) / ( 1 + exp( x %*% beta ) ) 
-        dudb <- exp( x %*% beta ) / ( 1 + exp( x %*% beta ) ) ^ 2
-        D <- x[,1] * dudb
-        for(p in 2:nbeta) D <- cbind(D, x[,p] * dudb)
-        vv <- u * ( 1 - u )
+        u <- exp( x %*% beta )  # mean function
+        dudb <- exp( x %*% beta ) # derivative
+        D <- x[,1] * dudb # D matrix, intialized 1st column
+        for(p in 2:nbeta) D <- cbind(D, x[,p] * dudb) # columnwise D matrix
+        vv <- u  # variance
         V <- matrix(ncol = length(vv), nrow = length(vv), 0)
-        diag(V) <- vv
-        W <- V ^ (1/2) %*% R %*% V ^ (1/2)
-        invW <- solve(W)
-        DWZj <- DWZj + t(D) %*% invW %*% ( y - u ) 
-        DWDj <- DWDj + t(D) %*% invW %*% D
+        diag(V) <- vv # variance diagonal matrix
+        W <- V ^ (1/2) %*% R %*% V ^ (1/2) # working covariance matrix
+        invW <- solve(W) # inverse covariance matrix
+        DWZj <- DWZj + t(D) %*% invW %*% ( y - u )  # score
+        DWDj <- DWDj + t(D) %*% invW %*% D # information
         
       }
       
-      DWZ <- DWZ + wi * DWZj
-      DWD <- DWD + wi * DWDj
-      DWZZWD <- DWZZWD + ( wi * DWZj ) %*% t( wi * DWZj )
+      DWZ <- DWZ + wi * DWZj # score
+      DWD <- DWD + wi * DWDj # information
+      DWZZWD <- DWZZWD + ( wi * DWZj ) %*% t( wi * DWZj ) # 
       
     }
     
-    invDWD <- solve(DWD)
-    bdiff <- invDWD %*% DWZ
-    beta <- beta + bdiff
+    invDWD <- solve(DWD) # information
+    bdiff <- invDWD %*% DWZ # iterative sum, score + information
+    beta <- beta + bdiff # iterated beta
     covbeta <- invDWD %*% DWZZWD %*% invDWD
-    U <- exp(X_mat %*% beta) / (1 + exp(X_mat %*% beta))
-    var <- U * (1 - U)
+    U <- exp(X_mat %*% beta) 
+    var <- U
     Z <- (Y_var - U) / sqrt(var)
     iter <- iter + 1
   }

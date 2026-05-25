@@ -91,7 +91,7 @@ mvoCWGEE <- function(formula, data, cluster, resp.ind, unit, corr.str, common.sl
   id <- unique.cluster <- unique(cluster)
 
   # use GLM to get initial beta estimates
-  beta0 <- as.vector(coef(glm(mformula, data = mdat, family = "binomial")))
+  beta0 <- as.vector(coef(glm(mformula, data = mdat, family = "poisson"))) #link
   Z <- glm(mformula, data = mdat, family = "binomial")$residuals
   #list(Y, nresponse, m, common.slope, unit, cluster, xvars, xvars.expand, xvars.common)
 
