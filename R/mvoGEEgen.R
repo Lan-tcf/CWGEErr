@@ -36,11 +36,11 @@ mvoGEEgen <- function(mdat, beta0, nbeta, id, Y_var, nresponse, X_mat, corr.str,
         
         y <- as.matrix( Y_var[mdat$cluster==i & mdat$unit == j] )
         x <- as.matrix( X_mat[mdat$cluster==i & mdat$unit == j,] )
-        u <- exp( x %*% beta ) / ( 1 + exp( x %*% beta ) ) 
-        dudb <- exp( x %*% beta ) / ( 1 + exp( x %*% beta ) ) ^ 2
+        u <- exp( x %*% beta ) # mean function 
+        dudb <- exp( x %*% beta ) # derivative
         D <- x[,1] * dudb
         for(p in 2:nbeta) D <- cbind(D, x[,p] * dudb)
-        vv <- u * ( 1 - u )
+        vv <- u 
         V <- matrix(ncol = length(vv), nrow = length(vv), 0)
         diag(V) <- vv
         W <- V ^ (1/2) %*% R %*% V ^ (1/2)
@@ -60,8 +60,8 @@ mvoGEEgen <- function(mdat, beta0, nbeta, id, Y_var, nresponse, X_mat, corr.str,
     bdiff <- invDWD %*% DWZ
     beta <- beta + bdiff
     covbeta <- invDWD %*% DWZZWD %*% invDWD
-    U <- exp(X_mat %*% beta) / (1 + exp(X_mat %*% beta))
-    var <- U * (1 - U)
+    U <- exp(X_mat %*% beta)
+    var <- U
     Z <- (Y_var - U) / sqrt(var)
     iter <- iter + 1
   }

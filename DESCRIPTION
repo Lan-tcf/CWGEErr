@@ -1,4 +1,4 @@
-Package: CWGEE
+Package: CWGEErr
 Type: Package
 Title: Cluster-weighted generalized estimating equations for data with informative cluster size
 Version: 0.1.0
@@ -10,4 +10,4 @@ Encoding: UTF-8
 LazyData: true
 URL: https://github.com/AyaMitani/CWGEE/
 BugReports: https://github.com/AyaMitani/CWGEE/issues
-RoxygenNote: 7.2.3
+Config/roxygen2/version: 8.0.0
